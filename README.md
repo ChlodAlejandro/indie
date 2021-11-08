@@ -73,7 +73,7 @@ jobs:
         run: "curl https://indie.mywebsite.net/api/update/personal-website?key=${UPDATE_KEY}"
 ```
 and that'll be enough to automatically pull the repository from GitHub and restart the
-`systemd` service associated with that project.g
+`systemd` service associated with that project.
 
 This flow is much more secure and has less possible vulnerabilities compared to running
 an unrestricted set of commands using an SSH connection, where *many things* can go wrong.
