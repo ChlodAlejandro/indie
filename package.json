@@ -2,7 +2,10 @@
     "name": "indie",
     "version": "1.0.0",
     "description": "In-development bare-metal project orchestration service based on Node.js",
-    "main": "src/Indie.js",
+    "main": "build/Indie.js",
+    "bin": {
+        "indie": "bin/indie"
+    },
     "scripts": {
         "build": "tsc"
     },

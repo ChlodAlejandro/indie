@@ -13,22 +13,17 @@ import {InferredOptionTypes} from "yargs";
 import path from "path";
 import {ChecklistResult} from "./core/checklists/Checklist";
 import PreflightChecklist from "./core/checklists/PreflightChecklist";
+import Commands from "./cli/Commands";
 
-export default class IndieEntrypoint {
+export default class Indie {
 
     // Raw require in order to circumvent `rootDir` limitation. `build` and `src`
     // directories lie on the same level, so there's no need to worry about discrepancies.
     static readonly PACKAGE = require(path.resolve(__dirname, "../package.json"));
     static readonly ARGUMENTS = <const>{
-        v: {
-            type: "boolean",
-            default: false,
-            description: "Shows the Indie version and exits immediately."
-        },
-        d: {
-            alias: ["verbose", "debug"],
+        verbose: {
+            alias: ["d", "debug"],
             type: "count",
-            default: 0,
             description: "Verbosity flag. Up to 3 allowed."
         },
         daemon: {
@@ -41,34 +36,47 @@ export default class IndieEntrypoint {
         }
     };
 
-    static argv : InferredOptionTypes<typeof IndieEntrypoint.ARGUMENTS>;
+    static argv : InferredOptionTypes<typeof Indie.ARGUMENTS>;
     static log : Logger;
 
     static async main() : Promise<void> {
-        this.argv = yargs(hideBin(process.argv)).options(this.ARGUMENTS).parseSync();
+        const argf = yargs(hideBin(process.argv))
+            .usage("Usage: indie [options] <subcommand> [options]")
+            .version(this.PACKAGE.version)
+            .alias("h", "help")
+            .alias("v", "version")
+            .options(this.ARGUMENTS)
+            .demandCommand(1)
+            .epilogue(
+                "Licensed under the GNU GPL v3.0 License. " +
+                "Made with love by indie developers."
+            );
 
-        if (this.argv.v) {
-            process.stdout.write(this.PACKAGE.version);
-            if (process.stdout.isTTY)
-                process.stdout.write("\n");
-            process.exit();
+        for (const command of Commands) {
+            argf.command(command.name, command.description);
         }
+
+        this.argv = argf.parseSync();
 
         this.log = Logger.createLogger({
             name: "indie",
-            level: process.env.NODE_ENV === "development" ? 10 : 30,
+            level: 30 - (this.argv.verbose * 10),
             stream: bunyanFormat({
                 outputMode: "short",
                 levelInString: true
             }, process.stdout)
         });
 
+        this.log.trace(this.argv);
+
         // Run preflight checklist.
         PreflightChecklist.run(this);
         if (PreflightChecklist.R.result === ChecklistResult.FAIL)
             process.exit(1);
+
+
     }
 
 }
 
-IndieEntrypoint.main();
+Indie.main();
