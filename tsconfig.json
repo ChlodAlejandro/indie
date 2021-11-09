@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "rootDir": "./src",
+        "outDir": "./build",
+
+        "target": "ES6",
+        "module": "CommonJS",
+        "moduleResolution": "Node",
+
+        "strict": true,
+        "allowJs": false,
+
+        "esModuleInterop": true,
+        "inlineSources": true,
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "noImplicitAny": true
+    },
+    "include": [
+        "./src/**/*"
+    ],
+    "exclude": [
+        "./node_modules/**/*"
+    ]
+}
